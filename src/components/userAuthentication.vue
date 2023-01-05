@@ -3,78 +3,106 @@
     <h1 class="center">Аутентификация</h1>
     <form @submit.prevent class="form">
       <input type="text" v-model="login" placeholder="Введите логин"/>
-      <input type="text" v-model="password" placeholder="Введите пароль"/>
+      <input type="password" v-model="password" placeholder="Введите пароль">
       <input @click="validate" type="submit" value="Отправить">
       <error-message :visible="visibility" :message="errorMessage"></error-message>
+      <nav-link link="/registration" title="Перейти к регистрации" :visibility="visibility"></nav-link>
     </form>
+
   </div>
 </template>
 
 <script>
-import router from "@/router/router";
-import axios from 'axios'
 import ErrorMessage from "@/components/UI/ErrorMessage";
+import NavLink from "@/components/UI/NavLink";
+import {mapActions} from "vuex"
+import store from "@/vuex/vuex";
+import router from "@/router/router";
+
+
 export default {
   name: "userAuthentication",
-  components: {ErrorMessage},
-  data(){
-    return{
+  components: {NavLink, ErrorMessage},
+  data() {
+    return {
       login: '',
       password: '',
       visibility: "hidden",
       errorMessage: '',
+      serverAnswer: ''
     }
   },
-  methods:{
-    validate(){
-      if(this.login !== "" && this.password !== ""){
-        this.sendDataToServer()
-      }
-      else{
-        this.visibility = 'visible'
-        this.errorMessage = 'Поле ввода логина и пароля должны быть заполнены!'
-      }
-    },
-    async sendDataToServer(){
-      try{
-        const response = await axios.get('/https://tomcat.kaplaan.ru/app')
-        if(response.data === true){
-          await router.replace('/main')
+  methods: {
+    ...mapActions([
+        'login'
+    ]),
+    validate() {
+      if (this.login !== "" && this.password !== "" && this.login.length >= 5 && this.password.length >= 5) {
+        this.loginUser()
+      } else {
+        if (this.login === "" || this.password === "") {
+          this.setError('Поле ввода логина и пароля должны быть заполнены!')
+        } else {
+          this.setError('Поле ввода логина и пароля должны быть заполнены и содержать не менее 5 символов!')
         }
       }
-      catch (e){
-        this.visibility = 'visible'
-        this.errorMessage = 'Ошибка отправки данных'
-        this.login = ''
-        this.password = ''
+    },
+    loginUser(){
+      const login = this.login
+      const password = this.password
+      store.dispatch('login', {login: login, password: password})
+      const answer = store.getters.getLoginAnswer
+      if(answer.status >= 200 && answer.status < 300){
+        router.push('/main')
+      } else{
+        this.setError(answer.message)
       }
-    }
+      alert(answer.status + " " + answer.message)
+    },
+    setError(errorMessage) {
+      this.visibility = 'visible'
+      this.errorMessage = errorMessage
+    },
   }
 }
 </script>
 
 <style scoped>
-.center{
-  margin: auto;
-  padding-top: 100px;
+nav-link {
+  margin: 0;
+  padding: 0;
 }
-.form{
+
+.center {
+  display: flex;
+  justify-content: center;
+  margin: 100px;
+}
+
+.form {
   margin-top: 10%;
   align-items: center;
   margin-left: auto;
   display: flex;
   flex-direction: column;
 }
-*, *:before, *:after {
-  box-sizing: border-box;
-}
-input[type=text] {
+
+input[type=text], input[type=password] {
   margin: 8px;
-  padding:10px;
-  border-radius:10px;
+  padding: 10px;
+  border-radius: 10px;
   width: 25%;
 }
-input[type=submit]{
+
+input[type=text]:hover, input[type=password]:hover {
+  border-color: #1E90FF;
+}
+
+input[type=submit]:hover {
+  background-color: #1E90FF;;
+}
+
+input[type=submit] {
   margin-top: 10px;
   width: 10%;
   border-radius: 10px;

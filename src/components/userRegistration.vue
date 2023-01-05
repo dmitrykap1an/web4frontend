@@ -3,7 +3,8 @@
     <h1 class="center">Регистрация</h1>
     <form @submit.prevent class="form">
       <input type="text" v-model="login" placeholder="Введите логин"/>
-      <input type="text" v-model="password" placeholder="Введите пароль"/>
+      <input type="password" v-model="password" placeholder="Введите пароль" autocomplete="off"/>
+      <input type="password" v-model="password2" placeholder="Введите пароль еще раз" autocomplete="off"/>
       <input @click="validate" type="submit" value="Отправить">
       <error-message :visible="visibility" :message="errorMessage"></error-message>
     </form>
@@ -14,35 +15,41 @@
 import router from "@/router/router";
 import axios from 'axios'
 import ErrorMessage from "@/components/UI/ErrorMessage";
+
 export default {
   name: "userRegistration",
   components: {ErrorMessage},
-  data(){
-    return{
+  data() {
+    return {
       login: '',
       password: '',
+      password2: '',
       visibility: "hidden",
       errorMessage: '',
     }
   },
-  methods:{
-    validate(){
-      if(this.login !== "" && this.password !== ""){
-        this.sendDataToServer()
-      }
-      else{
+  methods: {
+    validate() {
+      if (this.login.length >= 5 && this.password.length >= 5 && this.password2.length > 5) {
+        if (this.password === this.password2) {
+          this.sendDataToServer()
+        } else {
+          this.visibility = 'visible'
+          this.errorMessage = 'Поля с паролями не совпадают!'
+        }
+
+
+      } else {
         this.visibility = 'visible'
-        this.errorMessage = 'Поле ввода логина и пароля должны быть заполнены!'
+        this.errorMessage = 'Поле ввода логина и пароля должны быть заполнены и содержать не менее 5 символов!'
       }
     },
-    async sendDataToServer(){
-      try{
-        const response = await axios.get('/https://tomcat.kaplaan.ru/app')
-        if(response.data === true){
-          await router.replace('/main')
-        }
-      }
-      catch (e){
+    async sendDataToServer() {
+      try {
+        const response = await axios.get('http://localhost:8080/login')
+        console.log(response.data)
+        await router.replace('/main')
+      } catch (e) {
         this.visibility = 'visible'
         this.errorMessage = 'Ошибка отправки данных'
         this.login = ''
@@ -54,27 +61,40 @@ export default {
 </script>
 
 <style scoped>
-.center{
-  margin: auto;
-  padding-top: 100px;
+.center {
+  display: flex;
+  justify-content: center;
+  margin: 100px;
 }
-.form{
+
+.form {
   margin-top: 10%;
   align-items: center;
   margin-left: auto;
   display: flex;
   flex-direction: column;
 }
+
 *, *:before, *:after {
   box-sizing: border-box;
 }
-input[type=text] {
+
+input[type=text], input[type=password] {
   margin: 8px;
-  padding:10px;
-  border-radius:10px;
+  padding: 10px;
+  border-radius: 10px;
   width: 25%;
 }
-input[type=submit]{
+
+input[type=text]:hover, input[type=password]:hover {
+  border-color: #1E90FF;
+}
+
+input[type=submit]:hover {
+  background-color: #1E90FF;;
+}
+
+input[type=submit] {
   margin-top: 10px;
   width: 10%;
   border-radius: 10px;

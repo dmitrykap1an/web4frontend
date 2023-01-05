@@ -1,6 +1,8 @@
 import Main from "@/pages/Main";
 import {createRouter, createWebHistory} from "vue-router";
 import Greeting from "@/pages/Greeting";
+import userRegistration from "@/components/userRegistration";
+import userAuthentication from "@/components/userAuthentication";
 
 const routes = [
     {
@@ -10,6 +12,14 @@ const routes = [
     {
         path: '/main',
         component: Main
+    },
+    {
+        path: '/registration',
+        component: userRegistration
+    },
+    {
+        path: '/authentication',
+        component: userAuthentication
     }
 ]
 

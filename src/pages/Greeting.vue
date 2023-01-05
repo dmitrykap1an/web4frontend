@@ -1,17 +1,37 @@
 <template>
   <div>
-    <greeting-window
-        v-if="!currentRoute.length"
-        @redirect="changeRoute"
-    />
-    <user-authentication v-else-if="currentRoute === 'authentication'"/>
-    <user-registration v-else-if="currentRoute === 'registration'"/>
-
+    <info-about/>
+    <div class="center">
+      <my-button class="button" title="Регистрация" @click="goToRegistration"/>
+      <my-button class="button" title="Войти в аккаунт" @click="goToAuthentication"/>
+    </div>
   </div>
 </template>
 
-<style>
+<script>
+import InfoAbout from "@/components/InfoAbout";
+import MyButton from "@/components/UI/MyButton";
+import router from "@/router/router";
+export default {
+  components: {InfoAbout, MyButton},
+  name: 'greeting-window',
+  data(){
+    return{
+      show: false
+    }
+  },
+  methods:{
+    goToAuthentication(){
+      router.push('/authentication')
+    },
+    goToRegistration(){
+      router.push('/registration')
+    }
+  }
+}
+</script>
 
+<style scoped>
 .center {
   display: flex;
   justify-content: center;
@@ -27,23 +47,3 @@
   border-radius: 10px;
 }
 </style>
-<script>
-import userAuthentication from "@/components/userAuthentication";
-import GreetingWindow from "@/components/GreetingWindow";
-import UserRegistration from "@/components/userRegistration";
-
-export default {
-  name: 'greeting-page',
-  components: {UserRegistration, GreetingWindow, userAuthentication},
-  data(){
-    return{
-      currentRoute: ''
-    }
-  },
-  methods:{
-    changeRoute(route){
-      this.currentRoute = route
-    }
-  }
-}
-</script>
