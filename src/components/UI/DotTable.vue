@@ -7,17 +7,15 @@
         <th>Y</th>
         <th>R</th>
         <th>Выполнение</th>
-        <th>Время на сервере</th>
         <th>Время выполнения</th>
       </tr>
       </thead>
       <tbody class="data">
-      <tr v-for="(dot,i) in dots" :key="i">
+      <tr v-for="(dot, i) in tableDots" :key="i">
         <td>{{ dot.x }}</td>
         <td>{{ dot.y }}</td>
         <td>{{ dot.r }}</td>
-        <td> {{dot.hitResult }}</td>
-        <td>{{ dot.serverTime }}</td>
+        <td> {{ dot.hitResult }}</td>
         <td>{{ dot.executeTime }}</td>
       </tr>
       </tbody>
@@ -26,18 +24,31 @@
 </template>
 
 <script>
+import store from "@/vuex/vuex";
+import {toRaw} from "vue";
+
 export default {
   name: "DotTable",
-  data(){
-    return{
-      dots: [{
-        x: 1,
-        y: 2,
-        r: 3,
-        hitResult: true,
-        serverTime: 'Чт, 5 января, 3:00',
-        executeTime: '344 нс'
-      }]
+  data() {
+    return {
+      tableDots: [],
+    }
+  },
+  mounted(){
+    alert('mounted')
+      store.dispatch('getDotsFromServer')
+  },
+  computed:{
+    dots(){
+      alert("computed")
+      alert(store.state.dots.length)
+      return store.state.dots.length
+    }
+  },
+  watch: {
+    dots(){
+      alert("watch")
+      this.tableDots = toRaw(store.state.dots)
     }
   }
 }
@@ -55,10 +66,12 @@ export default {
   border-color: white;
   overflow: hidden;
 }
-.header{
+
+.header {
   background-color: #1E90FF;
 }
-.data{
+
+.data {
   background-color: white;
 }
 </style>

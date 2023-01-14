@@ -1,12 +1,14 @@
 <template>
-    <div class="input-data">
-      <radio-input description="Выбор X" :values="xValues" validate-by="validateX" v-on:validateX="setX" name="x"></radio-input>
-      <div class="block_description">Выбор Y</div>
-      <input type="text" v-model="inputY" maxlength="5">
-      <radio-input description="Выбор R" :values="rValues" validate-by="validateR" v-on:validateR="setR" nmae="r"></radio-input>
-      <my-button title="Отправить" @click="validate"></my-button>
-      <error-message :visible="visibility" :message="error"></error-message>
-    </div>
+  <div class="input-data">
+    <radio-input description="Выбор X" :values="xValues" validate-by="validateX" v-on:validateX="setX"
+                 name="x"></radio-input>
+    <div class="block_description">Выбор Y</div>
+    <input type="text" v-model="inputY" maxlength="5">
+    <radio-input description="Выбор R" :values="rValues" validate-by="validateR" v-on:validateR="setR"
+                 name="r"></radio-input>
+    <my-button title="Отправить" @click="validate"></my-button>
+    <error-message :visible="visibility" :message="error"></error-message>
+  </div>
 
 
 </template>
@@ -15,6 +17,8 @@
 import RadioInput from "@/components/UI/RadioInput";
 import MyButton from "@/components/UI/MyButton";
 import ErrorMessage from "@/components/UI/ErrorMessage";
+import store from "@/vuex/vuex";
+import {mapActions, mapGetters} from "vuex";
 
 export default {
   name: "UserInput",
@@ -30,7 +34,15 @@ export default {
       error: ''
     }
   },
+  computed:{
+    ...mapGetters([
+      'getDots'
+    ]),
+  },
   methods: {
+    ...mapActions([
+        'sendDot'
+    ]),
 
     validateY() {
       const y = Number.parseFloat(this.inputY.replace(',', '.')).toFixed(3)
@@ -62,6 +74,7 @@ export default {
 
     setR(value) {
       this.inputR = value
+      store.state.r = value
     },
     checkX() {
       return {
@@ -77,15 +90,14 @@ export default {
         errorMessage: !isNaN(this.inputR) ? "" : "Выберете R!"
       }
     },
-    validate(){
+    validate() {
       const x = this.checkX()
       const y = this.validateY()
       const r = this.checkR()
       const errorArr = [x.errorMessage, y.errorMessage, r.errorMessage]
       if (x.status && y.status && r.status) {
-        console.log("all ok", this.inputX, this.inputR, y.value)
-        this.sendDataToServer(x.value, y.value, r.value)
-        this.error = ''
+        this.sendDot(x.value, y.value, r.value)
+        this.clearError()
       } else {
         let errorString = ""
         errorArr.forEach(function (value) {
@@ -93,15 +105,20 @@ export default {
             errorString += value + "\n"
           }
         })
-        this.visibility = 'visible'
-        this.error = errorString
-        console.log(errorString === "")
+        this.setError(errorString)
       }
     },
-
-    sendDataToServer(x, y, r){
-      console.log(x, y, r)
+    sendDot(x, y, r){
+      store.dispatch('sendDot', {x: x, y: y, r: r})
     },
+    setError(message) {
+      this.visibility = 'visible'
+      this.error = message
+    },
+    clearError() {
+      this.error = ''
+      this.visibility = 'hidden'
+    }
   }
 }
 </script>
@@ -123,7 +140,7 @@ export default {
   background-color: white;
 }
 
-error-message{
+error-message {
 
 }
 </style>

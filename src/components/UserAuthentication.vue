@@ -32,9 +32,23 @@ export default {
       serverAnswer: ''
     }
   },
+  computed: {
+    answerLogin() {
+      return store.state.loginAnswer
+    }
+  },
+  watch: {
+    answerLogin() {
+      if (this.answerLogin.status >= 200 && this.answerLogin.status < 300) {
+        router.replace('/main')
+      } else {
+        this.setError(this.answerLogin.message)
+      }
+    }
+  },
   methods: {
     ...mapActions([
-        'login'
+      'login'
     ]),
     validate() {
       if (this.login !== "" && this.password !== "" && this.login.length >= 5 && this.password.length >= 5) {
@@ -47,17 +61,10 @@ export default {
         }
       }
     },
-    loginUser(){
+    loginUser() {
       const login = this.login
       const password = this.password
-      store.dispatch('login', {login: login, password: password})
-      const answer = store.getters.getLoginAnswer
-      if(answer.status >= 200 && answer.status < 300){
-        router.push('/main')
-      } else{
-        this.setError(answer.message)
-      }
-      alert(answer.status + " " + answer.message)
+      store.dispatch('login', {login:login, password: password})
     },
     setError(errorMessage) {
       this.visibility = 'visible'

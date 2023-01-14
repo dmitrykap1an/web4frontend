@@ -16,10 +16,8 @@ export default {
   methods: {
     validate(value) {
       if (this.validateBy === 'validateX') {
-        console.log('radio x =', value)
         this.$emit('validateX', value)
       } else {
-        console.log('radio r =', value)
         this.$emit('validateR', value)
       }
     }

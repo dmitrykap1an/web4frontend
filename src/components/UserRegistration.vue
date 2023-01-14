@@ -13,8 +13,9 @@
 
 <script>
 import router from "@/router/router";
-import axios from 'axios'
 import ErrorMessage from "@/components/UI/ErrorMessage";
+import {mapActions} from "vuex";
+import store from "@/vuex/vuex";
 
 export default {
   name: "userRegistration",
@@ -28,33 +29,42 @@ export default {
       errorMessage: '',
     }
   },
+  computed:{
+    answerRegistration(){
+      return store.state.registrationAnswer
+    }
+  },
+  watch:{
+    answerRegistration(){
+      if(this.answerRegistration.status >= 200 && this.answerRegistration.status < 300){
+        router.replace('/main')
+      } else{
+        this.setError(this.answerRegistration.message)
+      }
+    }
+  },
   methods: {
+    ...mapActions([
+        'registration'
+    ]),
     validate() {
       if (this.login.length >= 5 && this.password.length >= 5 && this.password2.length > 5) {
         if (this.password === this.password2) {
-          this.sendDataToServer()
+          const login = this.login
+          const password= this.password
+          store.dispatch('registration', {login: login, password: password})
         } else {
           this.visibility = 'visible'
-          this.errorMessage = 'Поля с паролями не совпадают!'
+          this.setError('Поля с паролями не совпадают!')
         }
-
-
       } else {
-        this.visibility = 'visible'
-        this.errorMessage = 'Поле ввода логина и пароля должны быть заполнены и содержать не менее 5 символов!'
+        this.setError('Поле ввода логина и пароля должны быть заполнены и содержать не менее 5 символов!')
       }
     },
-    async sendDataToServer() {
-      try {
-        const response = await axios.get('http://localhost:8080/login')
-        console.log(response.data)
-        await router.replace('/main')
-      } catch (e) {
-        this.visibility = 'visible'
-        this.errorMessage = 'Ошибка отправки данных'
-        this.login = ''
-        this.password = ''
-      }
+
+    setError(message){
+      this.visibility = 'visible'
+      this.errorMessage = message
     }
   }
 }
